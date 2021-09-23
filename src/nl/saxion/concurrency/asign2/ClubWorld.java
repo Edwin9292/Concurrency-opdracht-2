@@ -29,7 +29,6 @@ public class ClubWorld {
         System.out.println("Press Enter to quit...");
         scan.nextLine();
         System.exit(0);
-
     }
 
 }

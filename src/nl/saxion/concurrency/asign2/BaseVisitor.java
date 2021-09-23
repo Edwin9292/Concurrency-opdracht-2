@@ -25,9 +25,8 @@ public abstract class BaseVisitor implements Runnable {
     //so we do not get too many in the waiting queue
     protected void live() {
         randomTime(30000,random.nextInt(30) * 100);
+        clubExtreem.joinQueue(this);
     }
-
-
 
     protected void randomTime(int max, int min) {
         try {
