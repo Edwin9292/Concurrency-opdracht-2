@@ -13,11 +13,13 @@ public abstract class BaseVisitor implements Runnable {
         this.clubExtreem = clubExtreem;
     }
 
-
     @Override
     public void run() {
         while(true) {
             live();
+            clubExtreem.joinClub(this);
+            stayInClub();
+            clubExtreem.leaveClub(this);
         }
     }
 
@@ -25,7 +27,6 @@ public abstract class BaseVisitor implements Runnable {
     //so we do not get too many in the waiting queue
     protected void live() {
         randomTime(30000,random.nextInt(30) * 100);
-        clubExtreem.joinQueue(this);
     }
 
     protected void randomTime(int max, int min) {
@@ -36,4 +37,5 @@ public abstract class BaseVisitor implements Runnable {
         }
     }
 
+    abstract void stayInClub();
 }
