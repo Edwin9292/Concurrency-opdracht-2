@@ -11,7 +11,7 @@ public class Representative extends BaseVisitor {
     @Override
     void stayInClub() {
         try {
-            Thread.sleep(1000 + (new Random().nextInt((2000 - 1000) / 100) * 100) );
+            Thread.sleep(500 + (new Random().nextInt((1000 - 500) / 100) * 100) );
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

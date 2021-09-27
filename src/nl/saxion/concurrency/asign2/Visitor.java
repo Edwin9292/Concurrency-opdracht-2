@@ -12,7 +12,7 @@ public class Visitor extends BaseVisitor {
     @Override
     void stayInClub() {
         try {
-            Thread.sleep(3000 + (new Random().nextInt((4000 - 3000) / 100) * 100) );
+            Thread.sleep(800 + (new Random().nextInt((1000 - 800) / 100) * 100) );
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
