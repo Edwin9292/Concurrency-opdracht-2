@@ -6,11 +6,12 @@ public abstract class BaseVisitor implements Runnable {
 
     final protected ClubExtreem clubExtreem;
     final private Random random = new Random();
-
+    public String name;
 
 
     public BaseVisitor(ClubExtreem clubExtreem, String name) {
         this.clubExtreem = clubExtreem;
+        this.name = name;
     }
 
     @Override
