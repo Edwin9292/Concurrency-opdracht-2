@@ -5,7 +5,7 @@ import java.util.Scanner;
 public class ClubWorld {
 
 
-    private final int sizeOfTheClub  = 5, nrOfRepresentatives = 10, nrOfVisistors = 1000,
+    private final int sizeOfTheClub  = 20, nrOfRepresentatives = 10, nrOfVisistors = 1000,
                       consecutiveRepresentatives = 3  ;
 
 

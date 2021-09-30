@@ -14,7 +14,6 @@ public class ClubExtreem {
     Condition visitorWaiting = lock.newCondition();
     Condition representativeInClub = lock.newCondition();
     Condition clubNotHalfFull = lock.newCondition();
-    Condition clubNotFull = lock.newCondition();
 
     private int currentVisitorsInClub = 0;
 
@@ -32,6 +31,11 @@ public class ClubExtreem {
         return currentVisitorsInClub > (maxUsers/2);
     }
 
+    private boolean isClubFull() {return currentVisitorsInClub >= maxUsers;}
+    private boolean canVisitorEnter(){
+        return !isClubFull() && !isRepresentativeInClub && (!isRepresentativeWaiting || representativeCounter == consecutiveRepresentatives);
+
+    }
 
     public void joinClub(BaseVisitor visitor){
         //check if visitor is visitor or representative
@@ -46,7 +50,7 @@ public class ClubExtreem {
         lock.lock();
         try{
             // wachtrij -> in club? -> 3 op een rij? -> halfvol -> enter club -> leave club
-            System.out.println("Representative " + representative.name + " joining club");
+            System.out.println("Representative " + representative.name + " wants to join the club");
             while(isRepresentativeWaiting)
                 representativeWaiting.await();
 
@@ -65,7 +69,6 @@ public class ClubExtreem {
             System.out.println("Representative " + representative.name + " waiting till capacity is < half");
             while(isOverHalfCapacity())
                 clubNotHalfFull.await();
-
 
             //enter club
             currentVisitorsInClub++;
@@ -87,25 +90,22 @@ public class ClubExtreem {
         //take lock
         lock.lock();
         try{
-            while(representativeCounter >= 3)
+            while(representativeCounter >= consecutiveRepresentatives)
                 representativeLimit.await();
 
             visitorsWaiting++;
-//            System.out.println(visitor.name + " joining club, waiting till room in club. Club full = " + (currentVisitorsInClub >= maxUsers));
-            while(currentVisitorsInClub >= maxUsers)
-                clubNotFull.await();
 
-//            System.out.println(visitor.name + " joining club, representative waiting = " + isRepresentativeWaiting + ". repres counter = " + representativeCounter);
-            while(isRepresentativeWaiting && representativeCounter < 3 || isRepresentativeInClub)
+//            System.out.println(visitor.name + " joining club, = "  + " visitors waiting = " + visitorsWaiting);
+            while(!canVisitorEnter())
                 visitorWaiting.await();
 
             currentVisitorsInClub++;
             visitorsWaiting--;
             if(visitorsWaiting <= 0){
                 representativeCounter = 0;
-                representativeLimit.signal();
+                representativeLimit.signalAll();
             }
-            System.out.println(visitor.name + " entering club. There are now " + currentVisitorsInClub + "/" + maxUsers + " visitors in the club.");
+            System.out.println(visitor.name + " entering club. There are now " + currentVisitorsInClub + "/" + maxUsers + " visitors in the club." + "visitors waiting = " + visitorsWaiting);
         }
         //release lock
         catch (InterruptedException e) {
@@ -125,16 +125,19 @@ public class ClubExtreem {
                 //signal isRepresentativeInClub
                 isRepresentativeInClub = false;
                 representativeInClub.signal();
-                visitorWaiting.signal();
                 currentVisitorsInClub--;
-                clubNotHalfFull.signal();
+                visitorWaiting.signalAll();
+                if(!isRepresentativeWaiting && visitorsWaiting > 0){
+                    representativeCounter = 0;
+                    representativeLimit.signal();
+                }
                 System.out.println(visitor.name + " leaving club. There are now " + currentVisitorsInClub  + "/" + maxUsers + " visitors in the club.");
             }else{
                 //if visitor, lower visitor counter by 1
-                //signal clubIsFull
+                //signal clubIsNotHalfFull
                 currentVisitorsInClub--;
                 clubNotHalfFull.signal();
-                clubNotFull.signal();
+                visitorWaiting.signalAll();
                 System.out.println(visitor.name + " leaving club. There are now " + currentVisitorsInClub  + "/" + maxUsers + " visitors in the club.");
             }
         }
